@@ -1,7 +1,10 @@
 package com.admiralgroup.watercontrol;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,6 +34,16 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
 
         btnLogin.setOnClickListener(v -> attemptLogin());
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+        if (!isConnected) {
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
+            return;
+        }
     }
 
     private void attemptLogin() {
@@ -43,7 +56,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Call the login API
-        // check
         performLogin(username, password);
     }
 
@@ -59,8 +71,11 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("Login", "Token received: " + token);
                     saveToken(token);
                     navigateToMainActivity();
+                    Log.d("LoginActivity", "Login successful, token: " + response.body().getToken());
                 } else {
-                    Log.e("Login", "Login failed: " + response.code());
+//                    Log.e("Login", "Login failed: " + response.code());
+//                    Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                    Log.e("LoginActivity", "Login failed, response code: " + response.code());
                     Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
                 }
             }
